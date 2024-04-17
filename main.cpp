@@ -72,6 +72,11 @@ Eigen::Matrix4f change_model_matrix(Eigen::Matrix4f model_matrix, float rotation
     float sin_phi = std::sin(rotation_angle);
 
     Eigen::Matrix4f rotation;
+    if (axis == -1)
+    {
+        return model_matrix;
+    }
+
     if (axis==0) // x-axis
     {
     rotation << 
@@ -98,11 +103,10 @@ Eigen::Matrix4f change_model_matrix(Eigen::Matrix4f model_matrix, float rotation
     }
 
 
-    model = rotation * model_matrix;
+    model_matrix = rotation * model_matrix;
 
-    return model;
+    return model_matrix;
 }
-
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                                       float zNear, float zFar)
@@ -138,7 +142,7 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
 int main(int argc, const char** argv)
 {
     float angle = 0;
-    int axis = 0;
+    int axis = -1;
     bool command_line = false;
     std::string filename = "output.png";
 
@@ -161,7 +165,10 @@ int main(int argc, const char** argv)
     while (key != 27) {
         r.clear(rst::Buffers::Color | rst::Buffers::Depth);
 
-        r.set_model(get_model_matrix(angle, axis));
+        //r.set_model(get_model_matrix(angle, axis));
+        model_pos = change_model_matrix(model_pos, angle, axis);
+        r.set_model(model_pos);
+
         r.set_view(get_view_matrix(eye_pos));
         r.set_projection(get_projection_matrix(45, 1, 0.1, 50));
 
@@ -176,21 +183,23 @@ int main(int argc, const char** argv)
 
         std::cout << "frame count: " << frame_count++ << '\n';
 
+        axis = -1; // Nothin change
+
         if (key == 'a') {
             axis = 2;
-            angle += MY_PI/9.0;
+            angle = +MY_PI/90.0;
         }
         else if (key == 'd') {
             axis = 2;
-            angle -= MY_PI/9.0;
+            angle = -MY_PI/90.0;
         }
         else if (key == 'w') {
             axis = 0;
-            angle += MY_PI/9.0;
+            angle = +MY_PI/90.0;
         }
         else if (key == 's') {
             axis = 0;
-            angle -= MY_PI/9.0;
+            angle = -MY_PI/90.0;
         }
     }
 
