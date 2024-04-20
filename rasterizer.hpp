@@ -10,6 +10,7 @@
 using namespace Eigen;
 
 namespace rst {
+    
 enum class Buffers
 {
     Color = 1,

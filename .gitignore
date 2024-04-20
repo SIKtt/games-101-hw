@@ -1,10 +1,9 @@
 代码框架/
 CMakeFiles/
+.vscode/
 *.pdf
 *.cmake
 Makefile
 CMakeCache.txt
 cmake_install.txt
-CMakeLists.txt
-
 Rasterizer
