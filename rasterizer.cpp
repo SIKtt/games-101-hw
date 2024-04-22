@@ -13,13 +13,14 @@ rst::pos_buf_id rst::rasterizer::load_positions(const std::vector<Eigen::Vector3
 {
     auto id = get_next_id();
     pos_buf.emplace(id, positions);
-
+    std::cout << "pos num" << id << "\n";
     return {id};
 }
 
 rst::ind_buf_id rst::rasterizer::load_indices(const std::vector<Eigen::Vector3i> &indices)
 {
     auto id = get_next_id();
+    std::cout << "ind num" << id << "\n";
     ind_buf.emplace(id, indices);
 
     return {id};
@@ -137,50 +138,62 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 
 void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer, rst::Primitive type)
 {
-    if (type != rst::Primitive::Triangle)
+    if (type != rst::Primitive::Triangle && type != rst::Primitive::Line)
     {
-        throw std::runtime_error("Drawing primitives other than triangle is not implemented yet!");
+        //throw std::runtime_error("Drawing primitives other than triangle is not implemented yet!");
+        throw std::runtime_error("Drawing primitives more than default is not implemented yet!");
     }
-    auto& buf = pos_buf[pos_buffer.pos_id];
-    auto& ind = ind_buf[ind_buffer.ind_id];
 
-    float f1 = (100 - 0.1) / 2.0;
-    float f2 = (100 + 0.1) / 2.0;
-
-    Eigen::Matrix4f mvp = projection * view * model;
-    for (auto& i : ind)
+    if (type == rst::Primitive::Triangle)
     {
-        Triangle t;
+        auto& buf = pos_buf[pos_buffer.pos_id];
+        auto& ind = ind_buf[ind_buffer.ind_id];
 
-        Eigen::Vector4f v[] = {
-                mvp * to_vec4(buf[i[0]], 1.0f),
-                mvp * to_vec4(buf[i[1]], 1.0f),
-                mvp * to_vec4(buf[i[2]], 1.0f)
-        };
+        float f1 = (100 - 0.1) / 2.0;
+        float f2 = (100 + 0.1) / 2.0;
 
-        for (auto& vec : v) {
-            vec /= vec.w();
-        }
+        Eigen::Matrix4f mvp = projection * view * model;
 
-        for (auto & vert : v)
+        for (auto& i : ind) // c++ 11 ranged-based loop
         {
-            vert.x() = 0.5*width*(vert.x()+1.0);
-            vert.y() = 0.5*height*(vert.y()+1.0);
-            vert.z() = vert.z() * f1 + f2;
+            Triangle t;
+
+            Eigen::Vector4f v[] = {
+                    mvp * to_vec4(buf[i[0]], 1.0f),
+                    mvp * to_vec4(buf[i[1]], 1.0f),
+                    mvp * to_vec4(buf[i[2]], 1.0f)
+            };
+
+            for (auto& vec : v) {
+                //seems to get vertical
+                vec /= vec.w(); // return 4th element e.g. x(), y(), z(), w()?
+                
+            }
+
+            for (auto & vert : v)
+            {
+                // mid in screen
+                vert.x() = 0.5*width*(vert.x()+1.0);
+                vert.y() = 0.5*height*(vert.y()+1.0);
+                vert.z() = vert.z() * f1 + f2;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                std::cout << i << "\n";
+                // why three times?
+                t.setVertex(i, v[i].head<3>());
+                // t.setVertex(i, v[i].head<3>());
+                // t.setVertex(i, v[i].head<3>());
+            }
+            
+            // rarely to see 
+            t.setColor(0, 255.0,  0.0,  0.0);
+            t.setColor(1, 0.0  ,255.0,  0.0);
+            t.setColor(2, 0.0  ,  0.0,255.0);
+
+            rasterize_wireframe(t);
         }
-
-        for (int i = 0; i < 3; ++i)
-        {
-            t.setVertex(i, v[i].head<3>());
-            t.setVertex(i, v[i].head<3>());
-            t.setVertex(i, v[i].head<3>());
-        }
-
-        t.setColor(0, 255.0,  0.0,  0.0);
-        t.setColor(1, 0.0  ,255.0,  0.0);
-        t.setColor(2, 0.0  ,  0.0,255.0);
-
-        rasterize_wireframe(t);
     }
 }
 
