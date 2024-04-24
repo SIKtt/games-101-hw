@@ -17,7 +17,24 @@ rst::pos_buf_id rst::rasterizer::load_positions(const std::vector<Eigen::Vector3
     return {id};
 }
 
+rst::pos_buf_id rst::rasterizer::load_positions_cube(const std::vector<Eigen::Vector3f> &positions)
+{
+    auto id = get_next_id();
+    pos_buf.emplace(id, positions);
+    std::cout << "pos num" << id << "\n";
+    return {id};
+}
+
 rst::ind_buf_id rst::rasterizer::load_indices(const std::vector<Eigen::Vector3i> &indices)
+{
+    auto id = get_next_id();
+    std::cout << "ind num" << id << "\n";
+    ind_buf.emplace(id, indices);
+
+    return {id};
+}
+
+rst::ind_buf_id rst::rasterizer::load_indices_cube(const std::vector<int> &indices)
 {
     auto id = get_next_id();
     std::cout << "ind num" << id << "\n";
@@ -138,7 +155,9 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 
 void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer, rst::Primitive type)
 {
-    if (type != rst::Primitive::Triangle && type != rst::Primitive::Line)
+    if (type != rst::Primitive::Triangle 
+        && type != rst::Primitive::Line 
+        && type != rst::Primitive::Cube)
     {
         //throw std::runtime_error("Drawing primitives other than triangle is not implemented yet!");
         throw std::runtime_error("Drawing primitives more than default is not implemented yet!");
@@ -146,6 +165,17 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
 
     if (type == rst::Primitive::Triangle)
     {
+        draw_triangle(pos_buffer, ind_buffer);
+    }
+
+    if (type == rst::Primitive::Cube)
+    {
+        draw_cube(pos_buffer, ind_buffer);
+    }
+}
+
+void rst::rasterizer::draw_triangle(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
+{
         auto& buf = pos_buf[pos_buffer.pos_id];
         auto& ind = ind_buf[ind_buffer.ind_id];
 
@@ -194,7 +224,63 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
 
             rasterize_wireframe(t);
         }
-    }
+}
+
+
+void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
+{
+        auto& buf = pos_buf[pos_buffer.pos_id];
+        auto& ind = ind_buf[ind_buffer.ind_id];
+
+        float f1 = (100 - 0.1) / 2.0;
+        float f2 = (100 + 0.1) / 2.0;
+
+        Eigen::Matrix4f mvp = projection * view * model;
+
+        for (auto& i : ind) // c++ 11 ranged-based loop
+        {
+            Cube t;
+
+            Eigen::Vector4f v[] = {
+                    mvp * to_vec4(buf[i[0]], 1.0f),
+                    mvp * to_vec4(buf[i[1]], 1.0f),
+                    mvp * to_vec4(buf[i[2]], 1.0f),
+                    mvp * to_vec4(buf[i[3]], 1.0f),
+                    mvp * to_vec4(buf[i[4]], 1.0f),
+                    mvp * to_vec4(buf[i[5]], 1.0f),
+                    mvp * to_vec4(buf[i[6]], 1.0f),
+                    mvp * to_vec4(buf[i[7]], 1.0f)
+            };
+
+            for (auto& vec : v) {
+                //seems to get vertical
+                vec /= vec.w(); // return 4th element e.g. x(), y(), z(), w()?
+                
+            }
+
+            for (auto & vert : v)
+            {
+                // mid in screen
+                vert.x() = 0.5*width*(vert.x()+1.0);
+                vert.y() = 0.5*height*(vert.y()+1.0);
+                vert.z() = vert.z() * f1 + f2;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                //std::cout << i << "\n";
+                // why three times? // texture
+                t.setVertex(i, v[i].head<3>());
+                // t.setVertex(i, v[i].head<3>());
+                // t.setVertex(i, v[i].head<3>());
+            }
+            
+            // one pix  
+            // t.setColor(0, 255.0,  0.0,  0.0);
+            // t.setColor(1, 0.0  ,255.0,  0.0);
+            // t.setColor(2, 0.0  ,  0.0,255.0);
+
+            rasterize_wireframe_cube(t);
 }
 
 void rst::rasterizer::rasterize_wireframe(const Triangle& t)
@@ -206,7 +292,20 @@ void rst::rasterizer::rasterize_wireframe(const Triangle& t)
 
 void rst::rasterize_wireframe_cube(const Cube& c)
 {
-    //waiting 
+    draw_line(c.bbl(), c.bbr());
+    draw_line(c.bbr(), c.btr());
+    draw_line(c.btr(), c.btl());
+    draw_line(c.btl(), c.bbl());
+
+    draw_line(c.bbl(), c.tbl());
+    draw_line(c.bbr(), c.tbr());
+    draw_line(c.btl(), c.ttl());
+    draw_line(c.bbl(), c.tbl());
+
+    draw_line(c.tbl(), c.tbr());
+    draw_line(c.tbr(), c.ttr());
+    draw_line(c.ttr(), c.ttl());
+    draw_line(c.ttl(), c.tbl());
 }
 
 void rst::rasterizer::set_model(const Eigen::Matrix4f& m)

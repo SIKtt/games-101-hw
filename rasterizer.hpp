@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Triangle.hpp"
+#include "Cube.hpp"
 #include <algorithm>
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
@@ -56,6 +57,9 @@ class rasterizer
     pos_buf_id load_positions(const std::vector<Eigen::Vector3f>& positions);
     ind_buf_id load_indices(const std::vector<Eigen::Vector3i>& indices);
 
+    pos_buf_id load_positions_cube(const std::vector<Eigen::Vector3f>& positions);
+    ind_buf_id load_indices_cube(const std::vector<int>& indices);
+
     void set_model(const Eigen::Matrix4f& m);
     void set_view(const Eigen::Matrix4f& v);
     void set_projection(const Eigen::Matrix4f& p);
@@ -70,7 +74,10 @@ class rasterizer
 
   private:
     void draw_line(Eigen::Vector3f begin, Eigen::Vector3f end);
+    void draw_triangle(pos_buf_id pos_buffer, ind_buf_id ind_buffer);
+    void draw_cube(pos_buf_id pos_buffer, ind_buf_id ind_buffer);
     void rasterize_wireframe(const Triangle& t);
+    void rasterize_wireframe_cube(const Cube& t);
 
   private:
     Eigen::Matrix4f model;
