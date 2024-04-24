@@ -180,8 +180,8 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
 
             for (int i = 0; i < 3; i++)
             {
-                std::cout << i << "\n";
-                // why three times?
+                //std::cout << i << "\n";
+                // why three times? // texture
                 t.setVertex(i, v[i].head<3>());
                 // t.setVertex(i, v[i].head<3>());
                 // t.setVertex(i, v[i].head<3>());
@@ -202,6 +202,11 @@ void rst::rasterizer::rasterize_wireframe(const Triangle& t)
     draw_line(t.c(), t.a());
     draw_line(t.c(), t.b());
     draw_line(t.b(), t.a());
+}
+
+void rst::rasterize_wireframe_cube(const Cube& c)
+{
+    //waiting 
 }
 
 void rst::rasterizer::set_model(const Eigen::Matrix4f& m)
