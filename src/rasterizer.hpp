@@ -91,6 +91,7 @@ class rasterizer
     //Attention
     std::map<int, std::vector<Eigen::Vector3f>> pos_buf;
     std::map<int, std::vector<Eigen::Vector3i>> ind_buf;
+    std::map<int, std::vector<Eigen::Vector3f>> pos_buf_cube;
     std::map<int, std::vector<Eigen::Matrix<int, 8, 1>>> ind_buf_cube;
 
     std::vector<Eigen::Vector3f> frame_buf;

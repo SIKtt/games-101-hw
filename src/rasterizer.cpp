@@ -19,7 +19,7 @@ rst::pos_buf_id rst::rasterizer::load_positions(const std::vector<Eigen::Vector3
 rst::pos_buf_id rst::rasterizer::load_positions_cube(const std::vector<Eigen::Vector3f> &positions)
 {
     auto id = get_next_id();
-    pos_buf.emplace(id, positions);
+    pos_buf_cube.emplace(id, positions);
     std::cout << "pos num" << id << "\n";
     return {id};
 }
@@ -174,7 +174,7 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
     {
 
         draw_cube(pos_buffer, ind_buffer);
-        //std::cout << "1100" << "\n";    }
+    }
 }
 
 void rst::rasterizer::draw_triangle(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
@@ -231,7 +231,7 @@ void rst::rasterizer::draw_triangle(rst::pos_buf_id pos_buffer, rst::ind_buf_id 
 
 void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
 {
-        auto& buf = pos_buf[pos_buffer.pos_id];
+        auto& buf = pos_buf_cube[pos_buffer.pos_id];
         auto& ind = ind_buf_cube[ind_buffer.ind_id];
 
         float f1 = (100 - 0.1) / 2.0;
@@ -241,11 +241,10 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
 
 
         for (auto& i : ind) // c++ 11 ranged-based loop
+        // all possible Cube
         {
-            std::cout << "1100" << "\n";
+            
             Cube t;
-
-            //max + 1 to
             Eigen::Vector4f v[] = 
             {
                     mvp * to_vec4(buf[i[0]], 1.0f),
@@ -257,7 +256,7 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
                     mvp * to_vec4(buf[i[6]], 1.0f),
                     mvp * to_vec4(buf[i[7]], 1.0f)
             };
-        std::cout << "1111" << "\n";
+
             for (auto& vec : v) {
                 //seems to get vertical
                 vec /= vec.w(); // return 4th element e.g. x(), y(), z(), w()?
@@ -308,7 +307,7 @@ void rst::rasterizer::rasterize_wireframe_cube(const Cube& c)
     draw_line(c.bbl(), c.tbl());
     draw_line(c.bbr(), c.tbr());
     draw_line(c.btl(), c.ttl());
-    draw_line(c.bbl(), c.tbl());
+    draw_line(c.btr(), c.ttr());
 
     draw_line(c.tbl(), c.tbr());
     draw_line(c.tbr(), c.ttr());

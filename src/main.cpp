@@ -16,7 +16,7 @@ int main(int argc, const char** argv)
 
     rst::rasterizer r(700, 700);
 
-    Eigen::Vector3f eye_pos = {-2, -2, 10};
+    Eigen::Vector3f eye_pos = {-2, -2, 15};
 
     Eigen::Matrix4f model_pos = Eigen::Matrix4f::Identity();
 
@@ -35,17 +35,28 @@ int main(int argc, const char** argv)
         {1, 1, 1},
         {0, 1, 1},
     };
+    std::vector<Eigen::Vector3f> pos_cube_1{
+        {0, 0+1, 0},
+        {1, 0+1, 0},
+        {1, 1+1, 0},
+        {0, 1+1, 0},
+        {0, 0+1, 1},
+        {1, 0+1, 1},
+        {1, 1+1, 1},
+        {0, 1+1, 1},
+    };
     //typedef Eigen::Matrix<int, 8, 1> Vector8i;
-    std::vector<Eigen::Vector3i> ind{{0, 1, 2}};
+    //std::vector<Eigen::Vector3i> ind{{0, 1, 2}};
     std::vector<Eigen::Matrix<int, 8, 1>> ind_cube{{0, 1, 2, 3, 4, 5, 6, 7}};
 
     // auto pos_id = r.load_positions(pos);
     // auto ind_id = r.load_indices(ind);
-    std::cout << "000" << "\n";
-    auto pos_id = r.load_positions_cube(pos_cube);
-    auto ind_id = r.load_indices_cube(ind_cube);
+    // std::cout << "000" << "\n";
 
-
+    auto pos_id_cube = r.load_positions_cube(pos_cube);
+    auto ind_id_cube = r.load_indices_cube(ind_cube);
+    auto pos_id_cube_1 = r.load_positions_cube(pos_cube_1);
+    auto ind_id_cube_1 = r.load_indices_cube(ind_cube);
     int key = 0;
     int frame_count = 0;
 
@@ -58,10 +69,16 @@ int main(int argc, const char** argv)
 
         r.set_view(Transformation::get_view_matrix(eye_pos));
         r.set_projection(Transformation::get_projection_matrix(45, 1, 0.1, 50));
-        std::cout << "100"<< "\n";
-        r.draw(pos_id, ind_id, rst::Primitive::Cube);
+        //std::cout << "100"<< "\n";
         //r.draw(pos_id, ind_id, rst::Primitive::Triangle);
-        std::cout << "111" << "\n";
+
+        r.draw(pos_id_cube, ind_id_cube, rst::Primitive::Cube);
+
+
+        r.draw(pos_id_cube_1, ind_id_cube_1, rst::Primitive::Cube);
+
+        //r.draw(pos_id, ind_id, rst::Primitive::Triangle);
+        //std::cout << "111" << "\n";
 
         cv::Mat image(700, 700, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
@@ -74,12 +91,15 @@ int main(int argc, const char** argv)
         axis = -1; // Nothin change
 
         if (key == 'a') {
-            axis = 2;
-            angle = +MY_PI/90.0;
+            // affine
+            model_pos(0, 3) += 0.1;
+            // axis = 2;
+            // angle = +MY_PI/90.0;
         }
         else if (key == 'd') {
-            axis = 2;
-            angle = -MY_PI/90.0;
+            model_pos(0, 3) -= 0.1;
+            // axis = 2;
+            // angle = -MY_PI/90.0;
         }
         else if (key == 'w') {
             axis = 0;

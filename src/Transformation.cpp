@@ -93,6 +93,7 @@ Eigen::Matrix4f Transformation::change_model_matrix(Eigen::Matrix4f model_matrix
     return model_matrix;
 }
 
+//deprecate
 Eigen::Matrix4f Transformation::get_model_matrix(float rotation_angle, int axis)
 {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();

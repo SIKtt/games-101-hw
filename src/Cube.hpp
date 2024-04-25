@@ -2,7 +2,6 @@
 #define RASTERIZER_CUBE_H
 
 #include <eigen3/Eigen/Eigen>
-
 using namespace Eigen;
 
 class Cube
