@@ -58,10 +58,10 @@ int main(int argc, const char** argv)
 
         r.set_view(Transformation::get_view_matrix(eye_pos));
         r.set_projection(Transformation::get_projection_matrix(45, 1, 0.1, 50));
-
+        std::cout << "100"<< "\n";
         r.draw(pos_id, ind_id, rst::Primitive::Cube);
         //r.draw(pos_id, ind_id, rst::Primitive::Triangle);
-    std::cout << "111" << "\n";
+        std::cout << "111" << "\n";
 
         cv::Mat image(700, 700, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);

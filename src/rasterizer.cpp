@@ -172,9 +172,9 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
 
     if (type == rst::Primitive::Cube)
     {
-        std::cout << "111";
+
         draw_cube(pos_buffer, ind_buffer);
-    }
+        //std::cout << "1100" << "\n";    }
 }
 
 void rst::rasterizer::draw_triangle(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
@@ -239,8 +239,10 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
 
         Eigen::Matrix4f mvp = projection * view * model;
 
+
         for (auto& i : ind) // c++ 11 ranged-based loop
         {
+            std::cout << "1100" << "\n";
             Cube t;
 
             //max + 1 to
@@ -251,10 +253,11 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
                     mvp * to_vec4(buf[i[2]], 1.0f),
                     mvp * to_vec4(buf[i[3]], 1.0f),
                     mvp * to_vec4(buf[i[4]], 1.0f),
-                    // mvp * to_vec4(buf[i[5]], 1.0f),
-                    // mvp * to_vec4(buf[i[6]], 1.0f),
-                    // mvp * to_vec4(buf[i[7]], 1.0f)
+                    mvp * to_vec4(buf[i[5]], 1.0f),
+                    mvp * to_vec4(buf[i[6]], 1.0f),
+                    mvp * to_vec4(buf[i[7]], 1.0f)
             };
+        std::cout << "1111" << "\n";
             for (auto& vec : v) {
                 //seems to get vertical
                 vec /= vec.w(); // return 4th element e.g. x(), y(), z(), w()?
