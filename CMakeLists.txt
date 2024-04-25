@@ -7,10 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(/usr/local/include)
 
-file(GLOB_RESCURSE COMPILE_FILES
-    *.cpp
-    *.hpp
-)
+file(GLOB_RECURSE COMPILE_FILES "src/*.cpp" "src/*.hpp")
 
 # add_executable(Rasterizer 
 #     main.cpp 
@@ -20,5 +17,5 @@ file(GLOB_RESCURSE COMPILE_FILES
 #     Cube.cpp Cube.hpp
 # )
 
-add_executable(Rasterizer COMPILE_FILES)
+add_executable(Rasterizer ${COMPILE_FILES})
 target_link_libraries(Rasterizer ${OpenCV_LIBRARIES})

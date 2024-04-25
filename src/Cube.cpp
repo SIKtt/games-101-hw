@@ -4,7 +4,8 @@
 
 using namespace Eigen;
 
-Cube::Cube{
+Cube::Cube()
+{
     v[0] << 0, 0, 0;
     v[1] << 0, 0, 0;
     v[2] << 0, 0, 0;
@@ -15,7 +16,10 @@ Cube::Cube{
     v[7] << 0, 0, 0;
 }
 
-void Cube::setVertex(int ind, Eigen::Vector3f ver) { v[ind] = ver; }
+void Cube::setVertex(int ind, Eigen::Vector3f ver)
+{ 
+    v[ind] = ver; 
+}
 
 //void Cube::setNormal(int ind, Vector3f n) { normal[ind] = n; }
 

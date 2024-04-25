@@ -8,10 +8,14 @@
 #include "Cube.hpp"
 #include <algorithm>
 #include <eigen3/Eigen/Eigen>
+
+
+
 using namespace Eigen;
 
+
 namespace rst {
-    
+
 enum class Buffers
 {
     Color = 1,
@@ -58,7 +62,7 @@ class rasterizer
     ind_buf_id load_indices(const std::vector<Eigen::Vector3i>& indices);
 
     pos_buf_id load_positions_cube(const std::vector<Eigen::Vector3f>& positions);
-    ind_buf_id load_indices_cube(const std::vector<int>& indices);
+    ind_buf_id load_indices_cube(const std::vector<Eigen::Matrix<int, 8, 1>>& indices);
 
     void set_model(const Eigen::Matrix4f& m);
     void set_view(const Eigen::Matrix4f& v);
@@ -84,8 +88,10 @@ class rasterizer
     Eigen::Matrix4f view;
     Eigen::Matrix4f projection;
 
+    //Attention
     std::map<int, std::vector<Eigen::Vector3f>> pos_buf;
     std::map<int, std::vector<Eigen::Vector3i>> ind_buf;
+    std::map<int, std::vector<Eigen::Matrix<int, 8, 1>>> ind_buf_cube;
 
     std::vector<Eigen::Vector3f> frame_buf;
     std::vector<float> depth_buf;

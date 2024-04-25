@@ -8,7 +8,6 @@
 #include <math.h>
 #include <stdexcept>
 
-
 rst::pos_buf_id rst::rasterizer::load_positions(const std::vector<Eigen::Vector3f> &positions)
 {
     auto id = get_next_id();
@@ -29,17 +28,19 @@ rst::ind_buf_id rst::rasterizer::load_indices(const std::vector<Eigen::Vector3i>
 {
     auto id = get_next_id();
     std::cout << "ind num" << id << "\n";
+    std::cout << (indices[0]);
     ind_buf.emplace(id, indices);
-
     return {id};
 }
 
-rst::ind_buf_id rst::rasterizer::load_indices_cube(const std::vector<int> &indices)
+rst::ind_buf_id rst::rasterizer::load_indices_cube(const std::vector<Eigen::Matrix<int, 8, 1>> &indices)
 {
     auto id = get_next_id();
     std::cout << "ind num" << id << "\n";
-    ind_buf.emplace(id, indices);
-
+    std::cout << (indices[0]) << "\n";
+    //ind_buf_cube.insert({id, indices});
+    ind_buf_cube.emplace(id, indices);
+    std::cout << "ind over" << "\n";
     return {id};
 }
 
@@ -155,6 +156,7 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 
 void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer, rst::Primitive type)
 {
+
     if (type != rst::Primitive::Triangle 
         && type != rst::Primitive::Line 
         && type != rst::Primitive::Cube)
@@ -170,6 +172,7 @@ void rst::rasterizer::draw(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffe
 
     if (type == rst::Primitive::Cube)
     {
+        std::cout << "111";
         draw_cube(pos_buffer, ind_buffer);
     }
 }
@@ -226,11 +229,10 @@ void rst::rasterizer::draw_triangle(rst::pos_buf_id pos_buffer, rst::ind_buf_id 
         }
 }
 
-
 void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_buffer)
 {
         auto& buf = pos_buf[pos_buffer.pos_id];
-        auto& ind = ind_buf[ind_buffer.ind_id];
+        auto& ind = ind_buf_cube[ind_buffer.ind_id];
 
         float f1 = (100 - 0.1) / 2.0;
         float f2 = (100 + 0.1) / 2.0;
@@ -241,17 +243,18 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
         {
             Cube t;
 
-            Eigen::Vector4f v[] = {
+            //max + 1 to
+            Eigen::Vector4f v[] = 
+            {
                     mvp * to_vec4(buf[i[0]], 1.0f),
                     mvp * to_vec4(buf[i[1]], 1.0f),
                     mvp * to_vec4(buf[i[2]], 1.0f),
                     mvp * to_vec4(buf[i[3]], 1.0f),
                     mvp * to_vec4(buf[i[4]], 1.0f),
-                    mvp * to_vec4(buf[i[5]], 1.0f),
-                    mvp * to_vec4(buf[i[6]], 1.0f),
-                    mvp * to_vec4(buf[i[7]], 1.0f)
+                    // mvp * to_vec4(buf[i[5]], 1.0f),
+                    // mvp * to_vec4(buf[i[6]], 1.0f),
+                    // mvp * to_vec4(buf[i[7]], 1.0f)
             };
-
             for (auto& vec : v) {
                 //seems to get vertical
                 vec /= vec.w(); // return 4th element e.g. x(), y(), z(), w()?
@@ -281,6 +284,8 @@ void rst::rasterizer::draw_cube(rst::pos_buf_id pos_buffer, rst::ind_buf_id ind_
             // t.setColor(2, 0.0  ,  0.0,255.0);
 
             rasterize_wireframe_cube(t);
+        }
+
 }
 
 void rst::rasterizer::rasterize_wireframe(const Triangle& t)
@@ -290,7 +295,7 @@ void rst::rasterizer::rasterize_wireframe(const Triangle& t)
     draw_line(t.b(), t.a());
 }
 
-void rst::rasterize_wireframe_cube(const Cube& c)
+void rst::rasterizer::rasterize_wireframe_cube(const Cube& c)
 {
     draw_line(c.bbl(), c.bbr());
     draw_line(c.bbr(), c.btr());
